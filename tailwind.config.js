@@ -1,4 +1,5 @@
 /** @type {import('tailwindcss').Config} */
+const { fontFamily } = require("tailwindcss/defaultTheme");
 export default {
     darkMode: ["class"],
     content: [
@@ -13,17 +14,7 @@ export default {
   			sm: 'calc(var(--radius) - 4px)'
   		},
   		fontFamily: {
-  			serif: [
-  				'Georgia',
-  				'Times New Roman',
-  				'serif'
-  			],
-  			sans: [
-  				'Arial',
-  				'Helvetica',
-  				'sans-serif'
-  			],
-  			display: 'Oswald, ui-serif'
+			sans: ['"Nunito Sans"', ...fontFamily.sans],
   		},
   		colors: {
   			sidebar: {
@@ -35,7 +26,13 @@ export default {
   				'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
   				border: 'hsl(var(--sidebar-border))',
   				ring: 'hsl(var(--sidebar-ring))'
-  			}
+  			},
+			color1:"#4880FF",
+			color2:"#8280FF",
+			color3:"#202224",
+			color4:"#273142",
+			color5:"#FEC53D",
+			color6:"#4AD991"
   		}
   	}
   },
