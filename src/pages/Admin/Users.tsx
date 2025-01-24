@@ -11,20 +11,12 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import { Pen, Trash2 } from "lucide-react"
-import { Input } from "@/components/ui/input"
-import {
-    Pagination,
-    PaginationContent,
-    PaginationEllipsis,
-    PaginationItem,
-    PaginationLink,
-    PaginationNext,
-    PaginationPrevious,
-  } from "@/components/ui/pagination"
 import { Link } from "react-router-dom"
-  
+import Pagination from "@/AppComponent/pagination"
+import { useState } from "react"
+import Search from "@/AppComponent/search"
 
-export default function Blog() {
+export default function Users() {
     return (
         <div>
             <SidebarProvider
@@ -40,7 +32,7 @@ export default function Blog() {
                         <SidebarTrigger className="-ml-1 dark:text-white" />
                         <ModeToggle />
                     </header>
-                    <BlogContent />
+                    <UsersContent />
                 </SidebarInset>
             </SidebarProvider>
 
@@ -48,22 +40,73 @@ export default function Blog() {
     )
 }
 
-export const BlogContent = () => {
+const users = [
+    { name: "Ben Beno", email: "Beno@gmail.com", phone: "1234567890", role: "Admin" },
+    // Add your other users here
+    // Example data:
+    { name: "Jane Doe", email: "jane.doe@example.com", phone: "9876543210", role: "Author" },
+    { name: "John Smith", email: "john.smith@example.com", phone: "5551234567", role: "Author" },
+    { name: "Ben Beno", email: "Beno@gmail.com", phone: "1234567890", role: "Admin" },
+    // Add your other users here
+    // Example data:
+    { name: "Jane Doe", email: "jane.doe@example.com", phone: "9876543210", role: "Author" },
+    { name: "John Smith", email: "john.smith@example.com", phone: "5551234567", role: "Author" },
+    { name: "Ben Beno", email: "Beno@gmail.com", phone: "1234567890", role: "Admin" },
+    // Add your other users here
+    // Example data:
+    { name: "Jane Doe", email: "jane.doe@example.com", phone: "9876543210", role: "Author" },
+    { name: "John Smith", email: "john.smith@example.com", phone: "5551234567", role: "Author" },
+    { name: "Ben Beno", email: "Beno@gmail.com", phone: "1234567890", role: "Admin" },
+    // Add your other users here
+    // Example data:
+    { name: "Jane Doe", email: "jane.doe@example.com", phone: "9876543210", role: "Author" },
+    { name: "John Smith", email: "john.smith@example.com", phone: "5551234567", role: "Author" },
+    // Add more users to exceed 10 for testing
+];
+
+export const UsersContent = () => {
+    const [currentPage, setCurrentPage] = useState(1);
+    const [searchQuery, setSearchQuery] = useState("")
+
+    const itemsPerPage = 10;
+
+    const filteredUsers = users.filter((user) =>
+        Object.values(user)
+          .join(" ")
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase())
+    );
+
+    // Calculate total pages
+    const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+    const indexOfLastBlog = currentPage * itemsPerPage;
+    const indexOfFirstBlog = indexOfLastBlog - itemsPerPage;
+    const currentUsers = filteredUsers.slice(indexOfFirstBlog, indexOfLastBlog);
+
+    //handle page change
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
+    }
+
+    const handleSearch = (value:string) =>{
+      setSearchQuery(value);
+    }
+
     return (
-        <div className="ml-8 mr-12">
+        <div className="ml-8 mr-12 stick">
             <div className="flex justify-between">
                 <h1 className="text-3xl dark:text-white  font-bold">Users</h1>
-                <Input placeholder="Search" className="w-72" />
+                <Search query={searchQuery} onSearch={handleSearch} />
                 <Link to="/authorized/createUser">
-                   <Button className="">Create User</Button> 
+                    <Button className="">Create User</Button>
                 </Link>
-               
+
             </div>
             <div className="mt-12 dark:text-white">
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead className="w-[100px]">Name</TableHead>
+                            <TableHead>Name</TableHead>
                             <TableHead>Email</TableHead>
                             <TableHead>Phone Number</TableHead>
                             <TableHead>Role</TableHead>
@@ -71,34 +114,25 @@ export const BlogContent = () => {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        <TableRow>
-                            <TableCell className="font-medium">Ben Beno</TableCell>
-                            <TableCell>Beno@gmail.com</TableCell>
-                            <TableCell>Business</TableCell>
-                            <TableCell >Admin</TableCell>
-                            <TableCell>
-                                <Button className="mr-2 mb-2"><Pen /></Button>
-                                <Button><Trash2 /></Button>
-                            </TableCell>
-                        </TableRow>
+                        {currentUsers.map((user, index) => (
+                            <TableRow key={index}>
+                                <TableCell>{user.name}</TableCell>
+                                <TableCell>{user.email}</TableCell>
+                                <TableCell>{user.phone}</TableCell>
+                                <TableCell >{user.role}</TableCell>
+                                <TableCell>
+                                    <Button className="mr-2 mb-2"><Pen /></Button>
+                                    <Button><Trash2 /></Button>
+                                </TableCell>
+                            </TableRow>
+                        ))}
                     </TableBody>
                 </Table>
-                <Pagination>
-                    <PaginationContent>
-                        <PaginationItem>
-                            <PaginationPrevious href="#" />
-                        </PaginationItem>
-                        <PaginationItem>
-                            <PaginationLink href="#">1</PaginationLink>
-                        </PaginationItem>
-                        <PaginationItem>
-                            <PaginationEllipsis />
-                        </PaginationItem>
-                        <PaginationItem>
-                            <PaginationNext href="#" />
-                        </PaginationItem>
-                    </PaginationContent>
-                </Pagination>
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageCHange={handlePageChange}
+                />
             </div>
         </div>
     )

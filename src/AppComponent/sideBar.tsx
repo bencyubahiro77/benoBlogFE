@@ -49,7 +49,7 @@ export function SideBar() {
                 const isActive = location.pathname === item.url; 
                 return (
                   <SidebarMenuItem
-                    className={`py-2 ${isActive ? "bg-color1 text-white rounded-lg " : ""}`} 
+                    className={`py-2 ${isActive ? "bg-black dark:bg-color1 text-white rounded-lg " : ""}`} 
                     key={item.title}
                   >
                     <SidebarMenuButton
