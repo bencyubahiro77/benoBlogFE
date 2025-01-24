@@ -1,5 +1,7 @@
 "use client"
 
+import { useDispatch, useSelector } from 'react-redux';
+import { createUserAction } from '../../redux/action/createUser';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { SideBar } from "@/AppComponent/sideBar"
 import { ModeToggle } from '@/AppComponent/mode-toggle'
@@ -23,6 +25,11 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
+import { Loader2 } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
+import { AppDispatch, RootState } from '../../redux/store';
+import { useNavigate } from 'react-router-dom';
+import { unwrapResult } from '@reduxjs/toolkit';
 
 const formSchema = z.object({
     name: z.string().min(1, { message: "Name must be at least 1 character." }).max(50, { message: "Name must be at most 50 characters." }),
@@ -53,6 +60,10 @@ export default function CreateUser() {
 }
 
 export const CreateBlogContent = () => {
+    const loading = useSelector((state: RootState) => state.createUser.loading);
+    const dispatch = useDispatch<AppDispatch>();
+    const navigate = useNavigate()
+    const { toast } = useToast()
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -64,10 +75,23 @@ export const CreateBlogContent = () => {
         },
     })
 
-    const onCreateUser = (values: z.infer<typeof formSchema>) => {
-        // Do something with the form values.
-        // ✅ This will be type-safe and validated.
-        console.log(values)
+    const onCreateUser = async (values: z.infer<typeof formSchema>) => {
+      try {
+        const resultAction = await dispatch(createUserAction(values));
+        unwrapResult(resultAction);
+        const successMessage = resultAction.payload?.message || 'User created successfully!';
+        toast({
+            description: successMessage,
+        });
+        form.reset()
+        navigate("/admin")
+      } catch (error:any) {
+        const errorMessage = error?.message || 'Failed to create user';
+        toast({
+            variant: "destructive",
+            description: errorMessage,
+        })
+      }
     }
 
     return (
@@ -149,8 +173,8 @@ export const CreateBlogContent = () => {
                         />
                     </div>
 
-                    <Button type="submit" className="ml-8" >
-                        Create
+                    <Button type="submit" className="ml-8" disabled={loading}>
+                        {loading ? <Loader2 className='animate-spin' />:'Create'}
                     </Button>
                 </form>
             </Form>

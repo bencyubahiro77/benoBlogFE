@@ -9,8 +9,6 @@ export const loginAction = createAsyncThunk('authentication', async (formData: {
 
         // Decode the token
         const decoded= jwtDecode(token);
-
-        // Store token in localStorage for persistence
         localStorage.setItem('token', token);
         localStorage.setItem('user', JSON.stringify(decoded));
         

@@ -1,5 +1,5 @@
 import { ChevronUp, Home, Book, Users, User2 } from "lucide-react"
-import { Link, useLocation } from "react-router-dom"
+import { Link, useLocation, useNavigate } from "react-router-dom"
 import {
   Sidebar,
   SidebarContent,
@@ -74,11 +74,19 @@ export function SideBar() {
 }
 
 export function LogoutSideBar() {
+  const storedUser = localStorage.getItem('user');
+  const user = storedUser ? JSON.parse(storedUser) : null
+  const navigate = useNavigate()
+
+  const signOut = () => {
+    localStorage.clear()
+    navigate("/authorized/login")
+  }
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <SidebarMenuButton >
-          <User2 /> Benjamin Cyubahiro
+          <User2 /> {user.name}
           <ChevronUp className="ml-auto" />
         </SidebarMenuButton>
       </DropdownMenuTrigger>
@@ -86,7 +94,7 @@ export function LogoutSideBar() {
         <DropdownMenuItem>
           <span>Account</span>
         </DropdownMenuItem>
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={signOut}>
           <span>Sign out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
