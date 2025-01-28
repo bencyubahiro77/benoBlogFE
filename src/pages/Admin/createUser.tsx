@@ -84,7 +84,7 @@ export const CreateBlogContent = () => {
             description: successMessage,
         });
         form.reset()
-        navigate("/admin")
+        navigate("/admin/users")
       } catch (error:any) {
         const errorMessage = error?.message || 'Failed to create user';
         toast({

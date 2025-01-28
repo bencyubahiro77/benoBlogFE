@@ -1,3 +1,7 @@
+import React, { useEffect, useRef, useCallback } from "react"
+import { useSelector, useDispatch } from "react-redux"
+import { fetchUsersAction } from "../../redux/action/users"
+import { setCurrentPage } from "../../redux/slice/users"
 import { SidebarProvider, SidebarTrigger, SidebarInset, } from "@/components/ui/sidebar"
 import { SideBar } from "@/AppComponent/sideBar"
 import { ModeToggle } from '@/AppComponent/mode-toggle'
@@ -12,8 +16,9 @@ import {
 } from "@/components/ui/table"
 import { Pen, Trash2 } from "lucide-react"
 import { Link } from "react-router-dom"
+import { User } from '../../types/types';
 import Pagination from "@/AppComponent/pagination"
-import { useState } from "react"
+import { AppDispatch, RootState } from '../../redux/store';
 import Search from "@/AppComponent/search"
 
 export default function Users() {
@@ -40,56 +45,38 @@ export default function Users() {
     )
 }
 
-const users = [
-    { name: "Ben Beno", email: "Beno@gmail.com", phone: "1234567890", role: "Admin" },
-    // Add your other users here
-    // Example data:
-    { name: "Jane Doe", email: "jane.doe@example.com", phone: "9876543210", role: "Author" },
-    { name: "John Smith", email: "john.smith@example.com", phone: "5551234567", role: "Author" },
-    { name: "Ben Beno", email: "Beno@gmail.com", phone: "1234567890", role: "Admin" },
-    // Add your other users here
-    // Example data:
-    { name: "Jane Doe", email: "jane.doe@example.com", phone: "9876543210", role: "Author" },
-    { name: "John Smith", email: "john.smith@example.com", phone: "5551234567", role: "Author" },
-    { name: "Ben Beno", email: "Beno@gmail.com", phone: "1234567890", role: "Admin" },
-    // Add your other users here
-    // Example data:
-    { name: "Jane Doe", email: "jane.doe@example.com", phone: "9876543210", role: "Author" },
-    { name: "John Smith", email: "john.smith@example.com", phone: "5551234567", role: "Author" },
-    { name: "Ben Beno", email: "Beno@gmail.com", phone: "1234567890", role: "Admin" },
-    // Add your other users here
-    // Example data:
-    { name: "Jane Doe", email: "jane.doe@example.com", phone: "9876543210", role: "Author" },
-    { name: "John Smith", email: "john.smith@example.com", phone: "5551234567", role: "Author" },
-    // Add more users to exceed 10 for testing
-];
-
 export const UsersContent = () => {
-    const [currentPage, setCurrentPage] = useState(1);
-    const [searchQuery, setSearchQuery] = useState("")
+    const dispatch = useDispatch<AppDispatch>();
+    const hasFetched = useRef(false)
+    const { users, currentPage, totalPages, status, } = useSelector((state: RootState) => state.users);
+    const [searchQuery, setSearchQuery] = React.useState("");
 
-    const itemsPerPage = 10;
 
-    const filteredUsers = users.filter((user) =>
+    const fetchUsers = useCallback(() => {
+        if (!hasFetched.current) {
+            dispatch(fetchUsersAction(currentPage));
+            hasFetched.current = true;
+        }
+    }, [currentPage, dispatch])
+
+    useEffect(() => {
+        fetchUsers()
+    }, [fetchUsers]);
+
+    const handleSearch = (value: string) => {
+        setSearchQuery(value);
+    };
+
+    const filteredUsers = users ? users.filter((user: User) =>
         Object.values(user)
-          .join(" ")
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase())
-    );
-
-    // Calculate total pages
-    const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
-    const indexOfLastBlog = currentPage * itemsPerPage;
-    const indexOfFirstBlog = indexOfLastBlog - itemsPerPage;
-    const currentUsers = filteredUsers.slice(indexOfFirstBlog, indexOfLastBlog);
+            .join(" ")
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase())
+    ) : [];
 
     //handle page change
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
-    }
-
-    const handleSearch = (value:string) =>{
-      setSearchQuery(value);
     }
 
     return (
@@ -114,18 +101,36 @@ export const UsersContent = () => {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {currentUsers.map((user, index) => (
-                            <TableRow key={index}>
-                                <TableCell>{user.name}</TableCell>
-                                <TableCell>{user.email}</TableCell>
-                                <TableCell>{user.phone}</TableCell>
-                                <TableCell >{user.role}</TableCell>
-                                <TableCell>
-                                    <Button className="mr-2 mb-2"><Pen /></Button>
-                                    <Button><Trash2 /></Button>
+                        {status === "loading" ? (
+                            <TableRow>
+                                <TableCell colSpan={5}>
+                                    <div className="flex items-center justify-center h-40">
+                                        <span className="text-lg dark:text-white">Loading...</span>
+                                    </div>
                                 </TableCell>
                             </TableRow>
-                        ))}
+                        ) : filteredUsers.length === 0 ? (
+                            <TableRow>
+                                <TableCell colSpan={5}>
+                                    <div className="flex items-center justify-center h-40">
+                                        <span className="text-lg dark:text-white">No results found</span>
+                                    </div>
+                                </TableCell>
+                            </TableRow>
+                        ) : (
+                            filteredUsers.map((user: User, index) => (
+                                <TableRow key={index}>
+                                    <TableCell>{user.name}</TableCell>
+                                    <TableCell>{user.email}</TableCell>
+                                    <TableCell>{user.phoneNumber}</TableCell>
+                                    <TableCell >{user.role}</TableCell>
+                                    <TableCell>
+                                        <Button className="mr-2 mb-2"><Pen /></Button>
+                                        <Button><Trash2 /></Button>
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        )}
                     </TableBody>
                 </Table>
                 <Pagination
