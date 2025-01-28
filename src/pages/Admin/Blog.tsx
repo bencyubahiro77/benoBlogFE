@@ -1,3 +1,7 @@
+import React, { useEffect, useRef, useCallback } from "react"
+import { useSelector, useDispatch } from "react-redux"
+import { fetchBlogsAction } from "../../redux/action/blogs"
+import { setCurrentPage } from "../../redux/slice/blogs"
 import { SidebarProvider, SidebarTrigger, SidebarInset, } from "@/components/ui/sidebar"
 import { SideBar } from "@/AppComponent/sideBar"
 import { ModeToggle } from '@/AppComponent/mode-toggle'
@@ -13,8 +17,9 @@ import {
 import { Pen, Trash2 } from "lucide-react"
 import { Link } from "react-router-dom"
 import Pagination from "@/AppComponent/pagination"
-import { useState } from "react"
+import { AppDispatch, RootState } from '../../redux/store';
 import Search from "@/AppComponent/search"
+import { Blogs } from "../../types/types"
 
 export default function Blog() {
     return (
@@ -40,111 +45,37 @@ export default function Blog() {
     )
 }
 
-const blog = [
-    {
-        "title": "Understanding React",
-        "author": "John Doe",
-        "category": "Web Development",
-        "description": "A comprehensive guide to getting started with React.js."
-    },
-    {
-        "title": "CSS Best Practices",
-        "author": "Jane Smith",
-        "category": "Design",
-        "description": "Tips and tricks for writing clean and maintainable CSS."
-    },
-    {
-        "title": "Introduction to Python",
-        "author": "Alice Johnson",
-        "category": "Programming",
-        "description": "Learn the basics of Python programming for beginners."
-    },
-    {
-        "title": "Mastering Tailwind CSS",
-        "author": "Robert Brown",
-        "category": "UI/UX",
-        "description": "A deep dive into building modern interfaces with Tailwind CSS."
-    },
-    {
-        "title": "Mastering Tailwind CSS",
-        "author": "Robert Brown",
-        "category": "UI/UX",
-        "description": "A deep dive into building modern interfaces with Tailwind CSS."
-    },
-    {
-        "title": "Mastering Tailwind CSS",
-        "author": "Robert Brown",
-        "category": "UI/UX",
-        "description": "A deep dive into building modern interfaces with Tailwind CSS."
-    },
-    {
-        "title": "Mastering Tailwind CSS",
-        "author": "Robert Brown",
-        "category": "UI/UX",
-        "description": "A deep dive into building modern interfaces with Tailwind CSS."
-    },
-    {
-        "title": "Mastering Tailwind CSS",
-        "author": "Robert Brown",
-        "category": "UI/UX",
-        "description": "A deep dive into building modern interfaces with Tailwind CSS."
-    },
-    {
-        "title": "Mastering Tailwind CSS",
-        "author": "Robert Brown",
-        "category": "UI/UX",
-        "description": "A deep dive into building modern interfaces with Tailwind CSS."
-    },
-    {
-        "title": "Mastering Tailwind CSS",
-        "author": "Robert Brown",
-        "category": "UI/UX",
-        "description": "A deep dive into building modern interfaces with Tailwind CSS."
-    },
-    {
-        "title": "Mastering Tailwind CSS",
-        "author": "Robert Brown",
-        "category": "UI/UX",
-        "description": "A deep dive into building modern interfaces with Tailwind CSS."
-    },
-    {
-        "title": "Mastering Tailwind CSS",
-        "author": "Robert Brown",
-        "category": "UI/UX",
-        "description": "A deep dive into building modern interfaces with Tailwind CSS."
-    },
-    {
-        "title": "Mastering Tailwind CSS",
-        "author": "Robert Brown",
-        "category": "UI/UX",
-        "description": "A deep dive into building modern interfaces with Tailwind CSS."
-    }
-]
-
 export const BlogContent = () => {
-    const [currentPage, setCurrentPage] = useState(1);
-    const [searchQuery, setSearchQuery] = useState("")
+    const dispatch = useDispatch<AppDispatch>();
+    const hasFetched = useRef(false);
+    const { blogs, currentPage, totalPages, status, } = useSelector((state: RootState) => state.blogs);
+    const [searchQuery, setSearchQuery] = React.useState("");
 
-    const itemsPerPage = 10;
-    const filteredBlogs = blog.filter((blog) =>
+    const fetchBlogs = useCallback(() => {
+        if (!hasFetched.current) {
+            dispatch(fetchBlogsAction(currentPage));
+            hasFetched.current = true;
+        }
+    }, [currentPage, dispatch]);
+
+    useEffect(() => {
+        fetchBlogs();
+    }, [fetchBlogs])
+
+    const handleSearch = (value: string) => {
+        setSearchQuery(value);
+    }
+
+    const filteredBlogs = blogs ? blogs.filter((blog: Blogs) =>
         Object.values(blog)
-          .join(" ")
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase())
-    );
-    // Calculate total pages
-    const totalPages = Math.ceil(filteredBlogs.length / itemsPerPage);
-    const indexOfLastBlog = currentPage * itemsPerPage;
-    const indexOfFirstBlog = indexOfLastBlog - itemsPerPage;
-    const currentBlog = filteredBlogs.slice(indexOfFirstBlog, indexOfLastBlog);
+            .join(" ")
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase())
+    ) : [];
 
     //handle page change
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
-    }
-
-    const handleSearch = (value:string) =>{
-        setSearchQuery(value);
     }
 
     return (
@@ -163,23 +94,44 @@ export const BlogContent = () => {
                             <TableHead>Title</TableHead>
                             <TableHead>Author</TableHead>
                             <TableHead>Category</TableHead>
-                            {/* <TableHead>Description</TableHead> */}
+                            <TableHead>Description</TableHead>
                             <TableHead >Action</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {currentBlog.map((blog, index) => (
-                            <TableRow key={index}>
-                                <TableCell>{blog.title}</TableCell>
-                                <TableCell>{blog.author}</TableCell>
-                                <TableCell>{blog.category}</TableCell>
-                                {/* <TableCell >{blog.description}</TableCell> */}
-                                <TableCell>
-                                    <Button className="mr-2 mb-2"><Pen /></Button>
-                                    <Button><Trash2 /></Button>
+                        {status === "loading" ? (
+                            <TableRow>
+                                <TableCell colSpan={5}>
+                                    <div className="flex items-center justify-center h-40">
+                                        <span className="text-lg dark:text-white">Loading...</span>
+                                    </div>
                                 </TableCell>
                             </TableRow>
-                        ))}
+                        ) : filteredBlogs.length === 0 ? (
+                            <TableRow>
+                                <TableCell colSpan={5}>
+                                    <div className="flex items-center justify-center h-40">
+                                        <span className="text-lg dark:text-white">No results found</span>
+                                    </div>
+                                </TableCell>
+                            </TableRow>
+                        ):(
+                        filteredBlogs.map((blog: Blogs, index) => (
+                        <TableRow key={index}>
+                            <TableCell>{blog.title}</TableCell>
+                            <TableCell>{blog.author}</TableCell>
+                            <TableCell>{blog.category}</TableCell>
+                            <TableCell >{blog.description.length > 20 
+                              ? `${blog.description.substring(0, 20)}...`
+                              :  blog.description}
+                            </TableCell>
+                            <TableCell>
+                                <Button className="mr-2 mb-2"><Pen /></Button>
+                                <Button><Trash2 /></Button>
+                            </TableCell>
+                        </TableRow>
+                        ))
+                        )}
                     </TableBody>
                 </Table>
                 <Pagination
