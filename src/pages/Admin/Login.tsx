@@ -36,7 +36,10 @@ export function Login({
       // Dispatch login action with email and password
       const resultAction = await dispatch(loginAction({ email, password }));
       unwrapResult(resultAction); 
-      navigate("/admin");
+      const storedUser = localStorage.getItem('user');
+      const user = storedUser ? JSON.parse(storedUser) : null;
+      const userRole = user ? user.role : null;
+      userRole === "author" ? navigate("/admin/blog") : navigate("/admin");
     } catch (error) {
       toast({
         variant: "destructive",

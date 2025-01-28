@@ -23,21 +23,28 @@ const items = [
     title: "Home",
     url: "/admin",
     icon: Home,
+    allowedRoles: ['admin']
   },
   {
     title: "Blog",
     url: "/admin/blog",
     icon: Book,
+    allowedRoles: ['admin', 'author']
   },
   {
     title: "Users",
     url: "/admin/users",
     icon: Users,
+    allowedRoles: ['admin']
   },
 ]
 
 export function SideBar() {
-  const location = useLocation() 
+  const location = useLocation();
+  const storedUser = localStorage.getItem("user");
+  const user = storedUser ? JSON.parse(storedUser) : null;
+  const userRole = user ? user.role : null;
+
   return (
     <Sidebar>
       <SidebarContent>
@@ -45,11 +52,15 @@ export function SideBar() {
           <SidebarGroupLabel className="text-2xl justify-center mb-4 mt-4 font-extrabold">Beno Blog</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-            {items.map((item) => {
-                const isActive = location.pathname === item.url; 
+              {items.map((item) => {
+                // Check if the user's role matches the allowed roles for the item
+                if (!item.allowedRoles.includes(userRole)) {
+                  return null
+                }
+                const isActive = location.pathname === item.url;
                 return (
                   <SidebarMenuItem
-                    className={`py-2 ${isActive ? "bg-black dark:bg-color1 text-white rounded-lg " : ""}`} 
+                    className={`py-2 ${isActive ? "bg-black dark:bg-color1 text-white rounded-lg " : ""}`}
                     key={item.title}
                   >
                     <SidebarMenuButton

@@ -78,6 +78,16 @@ export const BlogContent = () => {
         setCurrentPage(page);
     }
 
+    const canEditOrDelete = (blogAuthorId: string) => {
+        const storedUser = localStorage.getItem('user');
+        const user = storedUser ? JSON.parse(storedUser) : null;
+        const userId = user ? user.id : null;
+        const userRole = user ? user.role : null;
+
+        // Check if the user is an admin or the author of the blog
+        return userRole === 'admin' || userId === blogAuthorId;
+    };
+
     return (
         <div className="ml-8 mr-12">
             <div className="flex justify-between">
@@ -115,22 +125,24 @@ export const BlogContent = () => {
                                     </div>
                                 </TableCell>
                             </TableRow>
-                        ):(
-                        filteredBlogs.map((blog: Blogs, index) => (
-                        <TableRow key={index}>
-                            <TableCell>{blog.title}</TableCell>
-                            <TableCell>{blog.author}</TableCell>
-                            <TableCell>{blog.category}</TableCell>
-                            <TableCell >{blog.description.length > 20 
-                              ? `${blog.description.substring(0, 20)}...`
-                              :  blog.description}
-                            </TableCell>
-                            <TableCell>
-                                <Button className="mr-2 mb-2"><Pen /></Button>
-                                <Button><Trash2 /></Button>
-                            </TableCell>
-                        </TableRow>
-                        ))
+                        ) : (
+                            filteredBlogs.map((blog: Blogs, index) => (
+                                <TableRow key={index}>
+                                    <TableCell>{blog.title}</TableCell>
+                                    <TableCell>{blog.author}</TableCell>
+                                    <TableCell>{blog.category}</TableCell>
+                                    <TableCell >{blog.description.length > 20
+                                        ? `${blog.description.substring(0, 20)}...`
+                                        : blog.description}
+                                    </TableCell>
+                                    {canEditOrDelete(blog.authorId) && (
+                                        <TableCell>
+                                            <Button className="mr-2 mb-2"><Pen /></Button>
+                                            <Button><Trash2 /></Button>
+                                        </TableCell>
+                                    )}
+                                </TableRow>
+                            ))
                         )}
                     </TableBody>
                 </Table>

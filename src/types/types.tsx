@@ -49,7 +49,7 @@ export interface Blogs {
     description: string;
     category: string;
     author: string;
-    authorID: string;
+    authorId: string;
     comments: string [];
     createdAt?: string;
     updatedAt?: string;

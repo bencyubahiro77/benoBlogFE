@@ -6,9 +6,10 @@ import LoginForm from './pages/Admin/Login'
 import CreateBlog from "./pages/Admin/createBlog"
 import CreateUser from "./pages/Admin/createUser"
 import { ThemeProvider } from "@/AppComponent/theme-provider"
+import ProtectedRoute from "./utils/protectedRoute"
 import '@fontsource/nunito-sans/400.css';
-import '@fontsource/nunito-sans/600.css'; 
-import '@fontsource/nunito-sans/700.css'; 
+import '@fontsource/nunito-sans/600.css';
+import '@fontsource/nunito-sans/700.css';
 import './App.css'
 
 const App: React.FC = () => {
@@ -17,12 +18,18 @@ const App: React.FC = () => {
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       {
         <Routes>
-          <Route path="admin" element={<DashBoard />} />
-          <Route path="admin/blog" element={<Blog />} />
-          <Route path="admin/users" element={<User />} />
           <Route path="authorized/login" element={<LoginForm />} />
-          <Route path="authorized/createUser" element={<CreateUser />} />
-          <Route path="authorized/createBlog" element={<CreateBlog />} />
+
+          {/* Protected routes only by admin */}
+          <Route element={<ProtectedRoute allowedRoles={['admin']}/>}>
+            <Route path="admin" element={<DashBoard />} />
+            <Route path="admin/users" element={<User />} />
+            <Route path="authorized/createUser" element={<CreateUser />} />
+          </Route>
+          <Route element={<ProtectedRoute allowedRoles={['admin', 'author']}/>}>
+            <Route path="authorized/createBlog" element={<CreateBlog />} />
+            <Route path="admin/blog" element={<Blog />} />
+          </Route>
         </Routes>
       }
     </ThemeProvider>
