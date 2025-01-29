@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useMemo } from "react"
+import React, { useEffect, useMemo } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import { fetchBlogsAction } from "../../redux/action/blogs"
 import { setCurrentPage } from "../../redux/slice/blogs"
