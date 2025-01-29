@@ -1,9 +1,9 @@
-import { createSlice } from '@reduxjs/toolkit'
+import { createSlice, PayloadAction  } from '@reduxjs/toolkit'
 import { fetchUsersAction } from "../action/users"
 import { UsersState } from '../../types/types'
 
 const initialState: UsersState = {
-    users:[],
+    usersByPage:[],
     currentPage: 1,
     totalPages: 1,
     status: 'idle',
@@ -14,7 +14,7 @@ const usersSlice = createSlice({
     name: 'users',
     initialState,
     reducers: {
-        setCurrentPage: (state, action) =>{
+        setCurrentPage: (state, action:PayloadAction<number>) =>{
             state.currentPage = action.payload 
         }
     },
@@ -25,12 +25,11 @@ const usersSlice = createSlice({
             })
             .addCase(fetchUsersAction.fulfilled, (state, action) => {
                 state.status = 'succeeded';
-                state.users = action.payload.data;
+                state.usersByPage[action.payload.page] = action.payload.data;
                 state.totalPages = Math.ceil(action.payload.total / 10); 
             })
-            .addCase(fetchUsersAction.rejected, (state, action) => {
+            .addCase(fetchUsersAction.rejected, (state) => {
                 state.status = 'failed';
-                state.error = action.payload as string;
             });
     },
 })

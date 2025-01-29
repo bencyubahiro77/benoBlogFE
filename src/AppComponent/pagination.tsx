@@ -26,16 +26,16 @@ const Pagination: React.FC<paginationProps> = ({ currentPage, totalPages, onPage
     <div className="mt-4 flex justify-center mb-4">
       <PaginationWrapper>
         <PaginationContent>
-          <PaginationItem>
+          <PaginationItem className="cursor-pointer">
             <PaginationPrevious onClick={handlePrevious} />
           </PaginationItem>
           {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-            <PaginationItem key={page} className={page === currentPage ? "bg-gray-200 font-bold text-color1 rounded-xl cursor-pointer" : ""}>
+            <PaginationItem key={page} className={page === currentPage ? "bg-gray-200 font-bold text-black rounded-xl cursor-pointer" : "cursor-pointer"}>
               <PaginationLink onClick={() => onPageCHange(page)}>{page}</PaginationLink>
             </PaginationItem>
           ))}
           {totalPages > 5 && <PaginationEllipsis />}
-          <PaginationItem>
+          <PaginationItem className="cursor-pointer">
             <PaginationNext onClick={handleNext} />
           </PaginationItem>
         </PaginationContent>

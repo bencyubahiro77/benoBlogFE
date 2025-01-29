@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useCallback } from "react"
+import React, { useEffect, useRef, useMemo } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import { fetchBlogsAction } from "../../redux/action/blogs"
 import { setCurrentPage } from "../../redux/slice/blogs"
@@ -47,35 +47,33 @@ export default function Blog() {
 
 export const BlogContent = () => {
     const dispatch = useDispatch<AppDispatch>();
-    const hasFetched = useRef(false);
-    const { blogs, currentPage, totalPages, status, } = useSelector((state: RootState) => state.blogs);
+    const { blogsByPage, currentPage, totalPages, status, } = useSelector((state: RootState) => state.blogs);
     const [searchQuery, setSearchQuery] = React.useState("");
 
-    const fetchBlogs = useCallback(() => {
-        if (!hasFetched.current) {
-            dispatch(fetchBlogsAction(currentPage));
-            hasFetched.current = true;
-        }
-    }, [currentPage, dispatch]);
+    const blogs = blogsByPage[currentPage] || [];
 
-    useEffect(() => {
-        fetchBlogs();
-    }, [fetchBlogs])
+    useEffect(()=> {
+        if(!blogsByPage[currentPage]){
+        dispatch(fetchBlogsAction(currentPage));
+        }
+    },[dispatch, currentPage,blogsByPage]);
+
+    const filteredBlogs = useMemo(() => {
+        return blogs.filter((blog: Blogs) =>
+            Object.values(blog)
+                .join(" ")
+                .toLowerCase()
+                .includes(searchQuery.toLowerCase())
+        )
+    }, [blogs,searchQuery])
 
     const handleSearch = (value: string) => {
         setSearchQuery(value);
     }
 
-    const filteredBlogs = blogs ? blogs.filter((blog: Blogs) =>
-        Object.values(blog)
-            .join(" ")
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase())
-    ) : [];
-
     //handle page change
     const handlePageChange = (page: number) => {
-        setCurrentPage(page);
+        dispatch(setCurrentPage(page));
     }
 
     const canEditOrDelete = (blogAuthorId: string) => {
@@ -105,6 +103,7 @@ export const BlogContent = () => {
                             <TableHead>Author</TableHead>
                             <TableHead>Category</TableHead>
                             <TableHead>Description</TableHead>
+                            <TableHead>Comments</TableHead>
                             <TableHead >Action</TableHead>
                         </TableRow>
                     </TableHeader>
@@ -126,15 +125,16 @@ export const BlogContent = () => {
                                 </TableCell>
                             </TableRow>
                         ) : (
-                            filteredBlogs.map((blog: Blogs, index) => (
-                                <TableRow key={index}>
-                                    <TableCell>{blog.title}</TableCell>
+                            filteredBlogs.map((blog: Blogs) => (
+                                <TableRow key={blog.uuid}>
+                                    <TableCell>{blog.title.charAt(0).toUpperCase() + blog.title.slice(1)}</TableCell>
                                     <TableCell>{blog.author}</TableCell>
-                                    <TableCell>{blog.category}</TableCell>
+                                    <TableCell>{blog.category.charAt(0).toUpperCase() + blog.category.slice(1)}</TableCell>
                                     <TableCell >{blog.description.length > 20
                                         ? `${blog.description.substring(0, 20)}...`
                                         : blog.description}
                                     </TableCell>
+                                    <TableCell>{blog.comments.length}</TableCell>
                                     {canEditOrDelete(blog.authorId) && (
                                         <TableCell>
                                             <Button className="mr-2 mb-2"><Pen /></Button>

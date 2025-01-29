@@ -64,12 +64,12 @@ export function SideBar() {
                     key={item.title}
                   >
                     <SidebarMenuButton
-                      className="text-lg pl-4 font-semibold opacity-100 hover:bg-inherit rounded-lg hover:text-white"
+                      className="text-lg pl-4 font-semibold opacity-100 hover:bg-inherit hover:text-white rounded-lg dark:hover:text-white"
                       asChild
                     >
-                      <Link to={item.url}>
+                      <Link to={item.url} className={`${isActive ? "hover:text-white":"hover:text-black" }`} >
                         <item.icon className="mr-4" />
-                        <span>{item.title}</span>
+                        <span >{item.title}</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>

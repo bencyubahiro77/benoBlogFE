@@ -1,11 +1,12 @@
-import { createSlice } from '@reduxjs/toolkit'
+import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { fetchBlogsAction } from "../action/blogs"
 import { blogsState } from '../../types/types'
 
 const initialState: blogsState = {
-    blogs:[],
+    blogsByPage:[],
     currentPage: 1,
     totalPages: 1,
+    totalComment:0,
     status: 'idle',
     error: null,
 }
@@ -14,7 +15,7 @@ const blogsSlice = createSlice({
     name: 'blogs',
     initialState,
     reducers: {
-        setCurrentPage: (state, action) =>{
+        setCurrentPage: (state, action:PayloadAction<number>) =>{
             state.currentPage = action.payload 
         }
     },
@@ -25,7 +26,7 @@ const blogsSlice = createSlice({
             })
             .addCase(fetchBlogsAction.fulfilled, (state, action) => {
                 state.status = 'succeeded';
-                state.blogs = action.payload.data;
+                state.blogsByPage[action.payload.page] = action.payload.data;
                 state.totalPages = Math.ceil(action.payload.total / 10); 
             })
             .addCase(fetchBlogsAction.rejected, (state, action) => {

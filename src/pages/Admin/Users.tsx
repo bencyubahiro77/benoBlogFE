@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useCallback } from "react"
+import React, { useEffect,useMemo, useState } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import { fetchUsersAction } from "../../redux/action/users"
 import { setCurrentPage } from "../../redux/slice/users"
@@ -47,36 +47,34 @@ export default function Users() {
 
 export const UsersContent = () => {
     const dispatch = useDispatch<AppDispatch>();
-    const hasFetched = useRef(false)
-    const { users, currentPage, totalPages, status, } = useSelector((state: RootState) => state.users);
-    const [searchQuery, setSearchQuery] = React.useState("");
+    const { usersByPage, currentPage, totalPages, status, } = useSelector((state: RootState) => state.users);
+    const [searchQuery, setSearchQuery] = useState("");
 
-
-    const fetchUsers = useCallback(() => {
-        if (!hasFetched.current) {
-            dispatch(fetchUsersAction(currentPage));
-            hasFetched.current = true;
-        }
-    }, [currentPage, dispatch])
+    // Get cached users for the current page
+    const users = usersByPage[currentPage] || []
 
     useEffect(() => {
-        fetchUsers()
-    }, [fetchUsers]);
+        if (!usersByPage[currentPage]) {
+            dispatch(fetchUsersAction(currentPage))
+        }
+    }, [dispatch, currentPage, usersByPage]);
+
+    const filteredUsers = useMemo(() => {
+        return users.filter((user: User) =>
+            Object.values(user)
+                .join(" ")
+                .toLowerCase()
+                .includes(searchQuery.toLowerCase())
+        )
+    }, [users,searchQuery])
 
     const handleSearch = (value: string) => {
         setSearchQuery(value);
     };
 
-    const filteredUsers = users ? users.filter((user: User) =>
-        Object.values(user)
-            .join(" ")
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase())
-    ) : [];
-
     //handle page change
     const handlePageChange = (page: number) => {
-        setCurrentPage(page);
+        dispatch(setCurrentPage(page));
     }
 
     return (
@@ -118,12 +116,12 @@ export const UsersContent = () => {
                                 </TableCell>
                             </TableRow>
                         ) : (
-                            filteredUsers.map((user: User, index) => (
-                                <TableRow key={index}>
-                                    <TableCell>{user.name}</TableCell>
+                            filteredUsers.map((user: User) => (
+                                <TableRow key={user.uuid}>
+                                    <TableCell>{user.name.charAt(0).toUpperCase() + user.name.slice(1)}</TableCell>
                                     <TableCell>{user.email}</TableCell>
                                     <TableCell>{user.phoneNumber}</TableCell>
-                                    <TableCell >{user.role}</TableCell>
+                                    <TableCell >{user.role.charAt(0).toUpperCase() + user.role.slice(1)}</TableCell>
                                     <TableCell>
                                         <Button className="mr-2 mb-2"><Pen /></Button>
                                         <Button><Trash2 /></Button>
