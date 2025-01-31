@@ -6,6 +6,7 @@ const initialState: UsersState = {
     usersByPage:[],
     currentPage: 1,
     totalPages: 1,
+    totalUsers: 0,
     status: 'idle',
     error: null,
 }
@@ -25,8 +26,9 @@ const usersSlice = createSlice({
             })
             .addCase(fetchUsersAction.fulfilled, (state, action) => {
                 state.status = 'succeeded';
-                state.usersByPage[action.payload.page] = action.payload.data;
+                state.usersByPage[action.payload.data.page] = action.payload.data.data;
                 state.totalPages = Math.ceil(action.payload.total / 10); 
+                state.totalUsers = action.payload.data.total
             })
             .addCase(fetchUsersAction.rejected, (state) => {
                 state.status = 'failed';

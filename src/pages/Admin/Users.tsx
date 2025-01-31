@@ -14,7 +14,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import { Pen, Trash2 } from "lucide-react"
+import { Loader2, Pen, Trash2 } from "lucide-react"
 import { Link } from "react-router-dom"
 import { User } from '../../types/types';
 import Pagination from "@/AppComponent/pagination"
@@ -95,7 +95,7 @@ export const UsersContent = () => {
                             <TableHead>Email</TableHead>
                             <TableHead>Phone Number</TableHead>
                             <TableHead>Role</TableHead>
-                            <TableHead >Action</TableHead>
+                            <TableHead className="text-center" >Action</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -103,7 +103,10 @@ export const UsersContent = () => {
                             <TableRow>
                                 <TableCell colSpan={5}>
                                     <div className="flex items-center justify-center h-40">
-                                        <span className="text-lg dark:text-white">Loading...</span>
+                                        <span className="text-lg dark:text-white flex">
+                                         <Loader2 className="animate-spin"/>
+                                         <p className="pl-2">Loading...</p>
+                                        </span>
                                     </div>
                                 </TableCell>
                             </TableRow>
@@ -118,13 +121,15 @@ export const UsersContent = () => {
                         ) : (
                             filteredUsers.map((user: User) => (
                                 <TableRow key={user.uuid}>
-                                    <TableCell>{user.name.charAt(0).toUpperCase() + user.name.slice(1)}</TableCell>
+                                    <TableCell className="p-4">{user.name.charAt(0).toUpperCase() + user.name.slice(1)}</TableCell>
                                     <TableCell>{user.email}</TableCell>
                                     <TableCell>{user.phoneNumber}</TableCell>
                                     <TableCell >{user.role.charAt(0).toUpperCase() + user.role.slice(1)}</TableCell>
-                                    <TableCell>
-                                        <Button className="mr-2 mb-2"><Pen /></Button>
-                                        <Button><Trash2 /></Button>
+                                    <TableCell className="text-center">
+                                        <div className="flex gap-2 items-center justify-center">
+                                            <Pen className="cursor-pointer"/>                                               
+                                            <Trash2 className="cursor-pointer" />
+                                        </div>
                                     </TableCell>
                                 </TableRow>
                             ))

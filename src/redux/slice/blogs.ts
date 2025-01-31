@@ -4,6 +4,8 @@ import { blogsState } from '../../types/types'
 
 const initialState: blogsState = {
     blogsByPage:[],
+    totalBlogs: 0,
+    totalComments: 0,
     currentPage: 1,
     totalPages: 1,
     totalComment:0,
@@ -26,8 +28,10 @@ const blogsSlice = createSlice({
             })
             .addCase(fetchBlogsAction.fulfilled, (state, action) => {
                 state.status = 'succeeded';
-                state.blogsByPage[action.payload.page] = action.payload.data;
+                state.blogsByPage[action.payload.data.page] = action.payload.data.data;
                 state.totalPages = Math.ceil(action.payload.total / 10); 
+                state.totalBlogs = action.payload.data.total
+                state.totalComments = action.payload.data.totalComment
             })
             .addCase(fetchBlogsAction.rejected, (state, action) => {
                 state.status = 'failed';

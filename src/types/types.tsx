@@ -29,6 +29,7 @@ export interface UsersState {
     usersByPage:  Record<number, User[]>;
     currentPage: number;
     totalPages: number;
+    totalUsers:number
     status: 'idle' | 'loading' | 'succeeded' | 'failed';
     error: string | null;
 }
@@ -36,6 +37,8 @@ export interface UsersState {
 export interface blogsState{
     blogsByPage: Record<number,Blogs[]>;
     currentPage: number;
+    totalBlogs: number;
+    totalComments:number;
     totalPages: number;
     totalComment:number;
     status: 'idle' | 'loading' | 'succeeded' | 'failed';

@@ -8,7 +8,7 @@ export const fetchBlogsAction = createAsyncThunk('fetchBlog', async (page:number
         const response = await API.get(`/blog/getAllBlog?page=${page}`,
             {headers: tokenHeaders()
         });
-        return response.data;
+        return {data:response.data,total:response.data.total, totalComment: response.data.totalComment};
     }catch (error:any) {
         return rejectWithValue(
             error.response?.data?.error || 'An unexpected error occurred.'

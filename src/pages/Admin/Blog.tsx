@@ -14,7 +14,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import { Pen, Trash2 } from "lucide-react"
+import { Loader2, Pen, Trash2 } from "lucide-react"
 import { Link } from "react-router-dom"
 import Pagination from "@/AppComponent/pagination"
 import { AppDispatch, RootState } from '../../redux/store';
@@ -52,11 +52,11 @@ export const BlogContent = () => {
 
     const blogs = blogsByPage[currentPage] || [];
 
-    useEffect(()=> {
-        if(!blogsByPage[currentPage]){
-        dispatch(fetchBlogsAction(currentPage));
+    useEffect(() => {
+        if (!blogsByPage[currentPage]) {
+            dispatch(fetchBlogsAction(currentPage));
         }
-    },[dispatch, currentPage,blogsByPage]);
+    }, [dispatch, currentPage, blogsByPage]);
 
     const filteredBlogs = useMemo(() => {
         return blogs.filter((blog: Blogs) =>
@@ -65,7 +65,7 @@ export const BlogContent = () => {
                 .toLowerCase()
                 .includes(searchQuery.toLowerCase())
         )
-    }, [blogs,searchQuery])
+    }, [blogs, searchQuery])
 
     const handleSearch = (value: string) => {
         setSearchQuery(value);
@@ -104,15 +104,18 @@ export const BlogContent = () => {
                             <TableHead>Category</TableHead>
                             <TableHead>Description</TableHead>
                             <TableHead>Comments</TableHead>
-                            <TableHead >Action</TableHead>
+                            <TableHead className="text-center">Action</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {status === "loading" ? (
                             <TableRow>
-                                <TableCell colSpan={5}>
+                                <TableCell colSpan={6}>
                                     <div className="flex items-center justify-center h-40">
-                                        <span className="text-lg dark:text-white">Loading...</span>
+                                        <span className="text-lg dark:text-white flex">
+                                            <Loader2 className="animate-spin" />
+                                            <p className="pl-2">Loading...</p>
+                                        </span>
                                     </div>
                                 </TableCell>
                             </TableRow>
@@ -120,25 +123,27 @@ export const BlogContent = () => {
                             <TableRow>
                                 <TableCell colSpan={5}>
                                     <div className="flex items-center justify-center h-40">
-                                        <span className="text-lg dark:text-white">No results found</span>
+                                        <span className="text-md dark:text-white">No results found</span>
                                     </div>
                                 </TableCell>
                             </TableRow>
                         ) : (
                             filteredBlogs.map((blog: Blogs) => (
                                 <TableRow key={blog.uuid}>
-                                    <TableCell>{blog.title.charAt(0).toUpperCase() + blog.title.slice(1)}</TableCell>
+                                    <TableCell className="p-4">{blog.title.charAt(0).toUpperCase() + blog.title.slice(1)}</TableCell>
                                     <TableCell>{blog.author}</TableCell>
                                     <TableCell>{blog.category.charAt(0).toUpperCase() + blog.category.slice(1)}</TableCell>
-                                    <TableCell >{blog.description.length > 20
-                                        ? `${blog.description.substring(0, 20)}...`
+                                    <TableCell >{blog.description
+                                        ? `${blog.description.slice(0, 10)}...`
                                         : blog.description}
                                     </TableCell>
                                     <TableCell>{blog.comments.length}</TableCell>
                                     {canEditOrDelete(blog.authorId) && (
                                         <TableCell>
-                                            <Button className="mr-2 mb-2"><Pen /></Button>
-                                            <Button><Trash2 /></Button>
+                                            <div className="flex gap-2 items-center justify-center">
+                                                <Pen className="cursor-pointer" />                                               
+                                                <Trash2 className="cursor-pointer" />
+                                            </div>
                                         </TableCell>
                                     )}
                                 </TableRow>
