@@ -189,8 +189,8 @@ export const BlogContent = () => {
                                     {canEditOrDelete(blog.authorId) && (
                                         <TableCell>
                                             <div className="flex gap-2 items-center justify-center">
-                                                <Pen className="cursor-pointer" />
-                                                <Trash2 className="cursor-pointer" onClick={() => handleDeleteBlog(blog)}/>
+                                                <Pen className="cursor-pointer h-[1.3em]" />
+                                                <Trash2 className="cursor-pointer h-[1.3em]" onClick={() => handleDeleteBlog(blog)}/>
                                             </div>
                                         </TableCell>
                                     )}

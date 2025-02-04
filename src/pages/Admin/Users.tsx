@@ -175,8 +175,8 @@ export const UsersContent = () => {
                                     <TableCell >{user.role.charAt(0).toUpperCase() + user.role.slice(1)}</TableCell>
                                     <TableCell className="text-center">
                                         <div className="flex gap-2 items-center justify-center">
-                                            <Pen className="cursor-pointer" />
-                                            <Trash2 className="cursor-pointer" onClick={() => handleDeleteUser(user)} />
+                                            <Pen className="cursor-pointer h-[1.3em]" />
+                                            <Trash2 className="cursor-pointer h-[1.3em]" onClick={() => handleDeleteUser(user)} />
                                         </div>
                                     </TableCell>
                                 </TableRow>

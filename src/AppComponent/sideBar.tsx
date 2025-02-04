@@ -102,10 +102,10 @@ export function LogoutSideBar() {
         </SidebarMenuButton>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-44">
-        <DropdownMenuItem>
+        <DropdownMenuItem className="cursor-pointer">
           <span>Account</span>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={signOut}>
+        <DropdownMenuItem onClick={signOut} className="cursor-pointer">
           <span>Sign out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
