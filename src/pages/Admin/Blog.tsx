@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react"
+import React, { useEffect, useMemo, useState } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import { fetchBlogsAction } from "../../redux/action/blogs"
 import { setCurrentPage } from "../../redux/slice/blogs"
@@ -14,12 +14,22 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog"
 import { Loader2, Pen, Trash2 } from "lucide-react"
 import { Link } from "react-router-dom"
 import Pagination from "@/AppComponent/pagination"
 import { AppDispatch, RootState } from '../../redux/store';
 import Search from "@/AppComponent/search"
 import { Blogs } from "../../types/types"
+import { unwrapResult } from '@reduxjs/toolkit';
+import { useToast } from "@/hooks/use-toast"
+import { deleteBlogAction } from "@/redux/action/deleteBlog"
 
 export default function Blog() {
     return (
@@ -46,9 +56,14 @@ export default function Blog() {
 }
 
 export const BlogContent = () => {
+    const [searchQuery, setSearchQuery] = useState("");
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [blogToDelete, setBlogToDelete] = useState<Blogs | null>(null)
+
     const dispatch = useDispatch<AppDispatch>();
+    const { toast } = useToast()
     const { blogsByPage, currentPage, totalPages, status, } = useSelector((state: RootState) => state.blogs);
-    const [searchQuery, setSearchQuery] = React.useState("");
+    const loading = useSelector((state: RootState) => state.deleteBlog.loading);
 
     const blogs = blogsByPage[currentPage] || [];
 
@@ -84,6 +99,39 @@ export const BlogContent = () => {
 
         // Check if the user is an admin or the author of the blog
         return userRole === 'admin' || userId === blogAuthorId;
+    };
+
+    const handleDeleteBlog = (blog: Blogs) => {
+        setBlogToDelete(blog)
+        setIsDialogOpen(true);
+    };
+
+    const handleCancel = () => {
+        setBlogToDelete(null);
+        setIsDialogOpen(false);
+    };
+
+    const handleConfirmDelete = async (blogId: any) => {
+        if (blogToDelete) {
+            try {
+                const resultAction = await dispatch(deleteBlogAction(blogId));
+                unwrapResult(resultAction);
+                const successMessage = resultAction.payload?.message;
+                toast({
+                    description: successMessage,
+                });
+            } catch (error: any) {
+                const errorMessage = error?.message || 'Failed to delete blog';
+                toast({
+                    variant: "destructive",
+                    description: errorMessage,
+                })
+            }
+            finally {
+                setBlogToDelete(null);
+                setIsDialogOpen(false);
+            }
+        }
     };
 
     return (
@@ -130,7 +178,7 @@ export const BlogContent = () => {
                         ) : (
                             filteredBlogs.map((blog: Blogs) => (
                                 <TableRow key={blog.uuid}>
-                                    <TableCell className="p-4">{blog.title.charAt(0).toUpperCase() + blog.title.slice(1)}</TableCell>
+                                    <TableCell>{blog.title.charAt(0).toUpperCase() + blog.title.slice(1)}</TableCell>
                                     <TableCell>{blog.author}</TableCell>
                                     <TableCell>{blog.category.charAt(0).toUpperCase() + blog.category.slice(1)}</TableCell>
                                     <TableCell >{blog.description
@@ -141,8 +189,8 @@ export const BlogContent = () => {
                                     {canEditOrDelete(blog.authorId) && (
                                         <TableCell>
                                             <div className="flex gap-2 items-center justify-center">
-                                                <Pen className="cursor-pointer" />                                               
-                                                <Trash2 className="cursor-pointer" />
+                                                <Pen className="cursor-pointer" />
+                                                <Trash2 className="cursor-pointer" onClick={() => handleDeleteBlog(blog)}/>
                                             </div>
                                         </TableCell>
                                     )}
@@ -157,6 +205,21 @@ export const BlogContent = () => {
                     onPageCHange={handlePageChange}
                 />
             </div>
+            {isDialogOpen && blogToDelete && (
+                <Dialog open={isDialogOpen} onOpenChange={handleCancel}>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle className="text-center">Are you sure you want to delete {blogToDelete.title} ?</DialogTitle>
+                            <DialogDescription className="pt-4 justify-center flex ">
+                                <Button variant="secondary" onClick={handleCancel}>Cancel</Button>
+                                <Button variant="destructive" className="ml-4" disabled={loading} onClick={() => handleConfirmDelete(blogToDelete.uuid)}>
+                                    {loading ? <Loader2 className='animate-spin' /> : 'Confirm'}
+                                </Button>
+                            </DialogDescription>
+                        </DialogHeader>
+                    </DialogContent>
+                </Dialog>
+            )}
         </div>
     )
 }

@@ -15,7 +15,7 @@ import './App.css'
 const App: React.FC = () => {
 
   return (
-    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+    <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
       {
         <Routes>
           <Route path="authorized/login" element={<LoginForm />} />
