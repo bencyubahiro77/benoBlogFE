@@ -26,7 +26,7 @@ const items = [
     allowedRoles: ['admin']
   },
   {
-    title: "Blog",
+    title: "Blogs",
     url: "/admin/blog",
     icon: Book,
     allowedRoles: ['admin', 'author']

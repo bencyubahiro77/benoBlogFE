@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { createBlogAction } from "../action/createBlog"
+import { deleteBlogAction } from '../action/deleteBlog'
 
 const initialState = {
     user: null,
@@ -7,24 +7,23 @@ const initialState = {
     error: null,
 }
 
-const createBlogSlice = createSlice({
-    name: 'createBlog',
+const deleteBlogSlice = createSlice({
+    name: 'deleteBlog',
     initialState,
     reducers: {},
     extraReducers: (builder) => {
         builder
-            .addCase(createBlogAction.pending, (state) => {
+            .addCase(deleteBlogAction.pending, (state) => {
                 state.loading = true;
                 state.error = null;
             })
-            .addCase(createBlogAction.fulfilled, (state) => {
+            .addCase(deleteBlogAction.fulfilled, (state) => {
                 state.loading = false;
             })
-            .addCase(createBlogAction.rejected, (state, action) => {
+            .addCase(deleteBlogAction.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload as any;
-            });
+            })
     },
 })
-
-export default createBlogSlice.reducer
+export default deleteBlogSlice.reducer

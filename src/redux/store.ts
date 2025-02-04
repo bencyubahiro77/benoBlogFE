@@ -5,6 +5,7 @@ import createBlogSlice from "./slice/createBlog"
 import usersSlice from "./slice/users"
 import blogsSlice from "./slice/blogs"
 import deleteUsersSlice from "./slice/deleteUser"
+import deleteBlogSlice from "./slice/deleteBlog"
 
 export const store = configureStore({
   reducer: {
@@ -13,7 +14,8 @@ export const store = configureStore({
     createBlog: createBlogSlice,
     users: usersSlice,
     blogs: blogsSlice,
-    deleteUser: deleteUsersSlice
+    deleteUser: deleteUsersSlice,
+    deleteBlog: deleteBlogSlice
   },
 })
 

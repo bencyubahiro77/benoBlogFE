@@ -169,7 +169,7 @@ export const UsersContent = () => {
                         ) : (
                             filteredUsers.map((user: User) => (
                                 <TableRow key={user.uuid}>
-                                    <TableCell className="p-4">{user.name.charAt(0).toUpperCase() + user.name.slice(1)}</TableCell>
+                                    <TableCell>{user.name.charAt(0).toUpperCase() + user.name.slice(1)}</TableCell>
                                     <TableCell>{user.email}</TableCell>
                                     <TableCell>{user.phoneNumber}</TableCell>
                                     <TableCell >{user.role.charAt(0).toUpperCase() + user.role.slice(1)}</TableCell>
