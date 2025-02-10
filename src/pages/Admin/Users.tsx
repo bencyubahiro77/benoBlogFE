@@ -23,7 +23,7 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog"
 import { Loader2, Pen, Trash2 } from "lucide-react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { User } from '../../types/types';
 import Pagination from "@/AppComponent/pagination"
 import { AppDispatch, RootState } from '../../redux/store';
@@ -62,6 +62,8 @@ export const UsersContent = () => {
 
     const dispatch = useDispatch<AppDispatch>();
     const { toast } = useToast()
+    const  navigate = useNavigate();
+
     const { usersByPage, currentPage, totalPages, status, } = useSelector((state: RootState) => state.users);
     const loading = useSelector((state: RootState) => state.deleteUser.loading);
 
@@ -125,6 +127,10 @@ export const UsersContent = () => {
         }
     };
 
+    const handleEditUser = (user: User) => {
+        navigate ("/authorized/createUser", {state:{userToEdit:user}})
+    }
+
     return (
         <div className="ml-8 mr-12 stick">
             <div className="flex justify-between">
@@ -175,7 +181,7 @@ export const UsersContent = () => {
                                     <TableCell >{user.role.charAt(0).toUpperCase() + user.role.slice(1)}</TableCell>
                                     <TableCell className="text-center">
                                         <div className="flex gap-2 items-center justify-center">
-                                            <Pen className="cursor-pointer h-[1.3em]" />
+                                            <Pen className="cursor-pointer h-[1.3em]" onClick={ () => handleEditUser(user)} />
                                             <Trash2 className="cursor-pointer h-[1.3em]" onClick={() => handleDeleteUser(user)} />
                                         </div>
                                     </TableCell>

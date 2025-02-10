@@ -2,6 +2,7 @@
 
 import { useDispatch, useSelector } from 'react-redux';
 import { createUserAction } from '../../redux/action/createUser';
+import { updateUserAction } from '../../redux/action/updateUser';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { SideBar } from "@/AppComponent/sideBar"
 import { ModeToggle } from '@/AppComponent/mode-toggle'
@@ -28,7 +29,7 @@ import {
 import { Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { AppDispatch, RootState } from '../../redux/store';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { unwrapResult } from '@reduxjs/toolkit';
 
 const formSchema = z.object({
@@ -38,7 +39,7 @@ const formSchema = z.object({
     role: z.string().nonempty({ message: "Role is required." }),
 })
 
-export default function CreateUser() {
+export default function CreateandUpdateUser() {
     return (
         <SidebarProvider
             style={
@@ -60,14 +61,19 @@ export default function CreateUser() {
 }
 
 export const CreateBlogContent = () => {
-    const loading = useSelector((state: RootState) => state.createUser.loading);
+    const creatingUser = useSelector((state: RootState) => state.createUser.loading);
+    const updatingUser = useSelector((state: RootState) => state.updateUser.loading);
+    const loading = creatingUser || updatingUser
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate()
     const { toast } = useToast()
 
+    const location = useLocation()
+    const userToEdit = location.state?.userToEdit;
+
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
-        defaultValues: {
+        defaultValues: userToEdit ?? {
             name: "",
             email: "",
             role: "",
@@ -76,29 +82,61 @@ export const CreateBlogContent = () => {
     })
 
     const onCreateUser = async (values: z.infer<typeof formSchema>) => {
-      try {
-        const resultAction = await dispatch(createUserAction(values));
-        unwrapResult(resultAction);
-        const successMessage = resultAction.payload?.message || 'User created successfully!';
-        toast({
-            description: successMessage,
-        });
-        form.reset()
-        navigate("/admin/users")
-      } catch (error:any) {
-        const errorMessage = error?.message || 'Failed to create user';
-        toast({
-            variant: "destructive",
-            description: errorMessage,
-        })
-      }
+        try {
+            const resultAction = await dispatch(createUserAction(values));
+            unwrapResult(resultAction);
+            const successMessage = resultAction.payload?.message || 'User created successfully!';
+            toast({
+                description: successMessage,
+            });
+            form.reset()
+            navigate("/admin/users")
+        } catch (error: any) {
+            const errorMessage = error?.message || 'Failed to create user';
+            toast({
+                variant: "destructive",
+                description: errorMessage,
+            })
+        }
     }
+
+    const onEditUser = async (values: z.infer<typeof formSchema>) => {
+        if (!userToEdit?.uuid) {
+            toast({
+                variant: "destructive",
+                description: "User ID is missing.",
+            });
+            return;
+        }
+
+        try {
+            const resultAction = await dispatch(
+                updateUserAction({
+                    id: { uuid: userToEdit.uuid },
+                    formData: values,
+                }));
+            unwrapResult(resultAction);
+            const successMessage = resultAction.payload?.message || 'User updated successfully!';
+            toast({
+                description: successMessage,
+            });
+            navigate("/admin/users")
+        } catch (error: any) {
+            const errorMessage = error?.message || 'Failed to update user';
+            toast({
+                variant: "destructive",
+                description: errorMessage,
+            })
+        }
+    }
+
+    const handleSubmit = form.handleSubmit(userToEdit ? onEditUser : onCreateUser)
 
     return (
         <div>
-            <h1 className="text-xl dark:text-white ml-8 font-bold">Create User</h1>
+            <h1 className="text-xl dark:text-white ml-8 font-bold">{userToEdit ? "Update User" : "Create User"}</h1>
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onCreateUser)} className="space-y-8">
+                <form onSubmit={handleSubmit} className="space-y-8">
                     <div className="flex flex-1 flex-col gap-4 py-4 px-8">
 
                         <FormField
@@ -124,7 +162,7 @@ export const CreateBlogContent = () => {
                                     <FormControl>
                                         <Input
                                             placeholder="Enter user email address"
-                                           {...field} 
+                                            {...field}
                                         />
                                     </FormControl>
                                     <FormMessage />
@@ -154,7 +192,7 @@ export const CreateBlogContent = () => {
                                     <FormLabel>Role</FormLabel>
                                     <FormControl>
                                         <Select
-                                            value={field.value} 
+                                            value={field.value}
                                             onValueChange={(value) => field.onChange(value)}
                                         >
                                             <SelectTrigger >
@@ -174,7 +212,7 @@ export const CreateBlogContent = () => {
                     </div>
 
                     <Button type="submit" className="ml-8" disabled={loading}>
-                        {loading ? <Loader2 className='animate-spin' />:'Create'}
+                        {loading ? <Loader2 className='animate-spin' /> : (userToEdit ? "Update" : "Create")}
                     </Button>
                 </form>
             </Form>

@@ -2,6 +2,7 @@
 
 import { useDispatch, useSelector } from 'react-redux';
 import { createBlogAction } from '../../redux/action/createBlog';
+import { updateBlogAction } from '../../redux/action/updateBlog';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { SideBar } from "@/AppComponent/sideBar"
 import { ModeToggle } from '@/AppComponent/mode-toggle'
@@ -29,7 +30,7 @@ import {
 import { Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { AppDispatch, RootState } from '../../redux/store';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { unwrapResult } from '@reduxjs/toolkit';
 
 
@@ -42,7 +43,7 @@ const formSchema = z.object({
     description: z.string().min(10, { message: "Description must be at least 10 characters." }).max(2545000),
 })
 
-export default function CreateUser() {
+export default function CreateandUpdateBlog() {
     return (
         <SidebarProvider
             style={
@@ -64,14 +65,21 @@ export default function CreateUser() {
 }
 
 export const CreateBlogContent = () => {
-    const loading = useSelector((state: RootState) => state.createBlog.loading);
+    const creatingBlog = useSelector((state: RootState) => state.createBlog.loading);
+    const updatingBlog = useSelector((state: RootState) => state.updateBlog.loading);
+
+    const loading = creatingBlog || updatingBlog
+
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate()
     const { toast } = useToast()
 
+    const location = useLocation();
+    const blogToEdit = location.state?.blogToEdit
+
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
-        defaultValues: {
+        defaultValues: blogToEdit ?? {
             title: "",
             description: "",
             category: "",
@@ -89,7 +97,7 @@ export const CreateBlogContent = () => {
             });
             form.reset()
             navigate("/admin/blog")
-          } catch (error:any) {
+        } catch (error: any) {
             const errorMessage = error?.message || 'Failed to create user';
             toast({
                 variant: "destructive",
@@ -98,11 +106,43 @@ export const CreateBlogContent = () => {
         }
     }
 
+    const onUpdateBlog = async (values: z.infer<typeof formSchema>) => {
+        if (!blogToEdit?.uuid) {
+            toast({
+                variant: "destructive",
+                description: "User ID is missing.",
+            });
+            return;
+        }
+        try {
+            const resultAction = await dispatch(
+                updateBlogAction({
+                    id: { uuid: blogToEdit.uuid },
+                    formData: values
+                }));
+            unwrapResult(resultAction);
+            const successMessage = resultAction.payload?.message || 'User created successfully!';
+            toast({
+                description: successMessage,
+            });
+            form.reset()
+            navigate("/admin/blog")
+        } catch (error: any) {
+            const errorMessage = error?.message || 'Failed to create user';
+            toast({
+                variant: "destructive",
+                description: errorMessage,
+            })
+        }
+    }
+
+    const handleSubmit = form.handleSubmit(blogToEdit ? onUpdateBlog : onCreateBlog)
+
     return (
         <div>
-            <h1 className="text-xl dark:text-white ml-8 font-bold">Create Blog</h1>
+            <h1 className="text-xl dark:text-white ml-8 font-bold">{blogToEdit ? "Update Blog" : "Create Blog"}</h1>
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onCreateBlog)} className="space-y-8">
+                <form onSubmit={handleSubmit} className="space-y-8">
                     <div className="flex flex-1 flex-col gap-4 py-4 px-8">
                         <FormField
                             control={form.control}
@@ -187,7 +227,7 @@ export const CreateBlogContent = () => {
                     </div>
 
                     <Button type="submit" className="ml-8" disabled={loading} >
-                     {loading?<Loader2 className='animate-spin'/> : "Create"}
+                        {loading ? <Loader2 className='animate-spin' /> : (blogToEdit ? "Update" : "Create")}
                     </Button>
                 </form>
             </Form>

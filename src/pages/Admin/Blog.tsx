@@ -22,7 +22,7 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog"
 import { Loader2, Pen, Trash2 } from "lucide-react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import Pagination from "@/AppComponent/pagination"
 import { AppDispatch, RootState } from '../../redux/store';
 import Search from "@/AppComponent/search"
@@ -62,6 +62,7 @@ export const BlogContent = () => {
 
     const dispatch = useDispatch<AppDispatch>();
     const { toast } = useToast()
+    const navigate = useNavigate()
     const { blogsByPage, currentPage, totalPages, status, } = useSelector((state: RootState) => state.blogs);
     const loading = useSelector((state: RootState) => state.deleteBlog.loading);
 
@@ -134,6 +135,10 @@ export const BlogContent = () => {
         }
     };
 
+    const handleEditBlog = (blog:Blogs) =>{
+        navigate("/authorized/createBlog", {state:{ blogToEdit: blog}});
+    }
+
     return (
         <div className="ml-8 mr-12">
             <div className="flex justify-between">
@@ -189,7 +194,7 @@ export const BlogContent = () => {
                                     {canEditOrDelete(blog.authorId) && (
                                         <TableCell>
                                             <div className="flex gap-2 items-center justify-center">
-                                                <Pen className="cursor-pointer h-[1.3em]" />
+                                                <Pen className="cursor-pointer h-[1.3em]" onClick={() => handleEditBlog(blog)} />
                                                 <Trash2 className="cursor-pointer h-[1.3em]" onClick={() => handleDeleteBlog(blog)}/>
                                             </div>
                                         </TableCell>

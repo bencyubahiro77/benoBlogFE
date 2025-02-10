@@ -3,8 +3,8 @@ import DashBoard from './pages/Admin/DashBoard'
 import Blog from './pages/Admin/Blog'
 import User from './pages/Admin/Users'
 import LoginForm from './pages/Admin/Login'
-import CreateBlog from "./pages/Admin/createBlog"
-import CreateUser from "./pages/Admin/createUser"
+import CreateAndUpdateBlog from "./pages/Admin/createandUpdateBlog"
+import CreateAndUpdateUser from "./pages/Admin/createandUpdateUser"
 import { ThemeProvider } from "@/AppComponent/theme-provider"
 import ProtectedRoute from "./utils/protectedRoute"
 import '@fontsource/nunito-sans/400.css';
@@ -24,10 +24,10 @@ const App: React.FC = () => {
           <Route element={<ProtectedRoute allowedRoles={['admin']}/>}>
             <Route path="admin" element={<DashBoard />} />
             <Route path="admin/users" element={<User />} />
-            <Route path="authorized/createUser" element={<CreateUser />} />
+            <Route path="authorized/createUser" element={<CreateAndUpdateUser />} />
           </Route>
           <Route element={<ProtectedRoute allowedRoles={['admin', 'author']}/>}>
-            <Route path="authorized/createBlog" element={<CreateBlog />} />
+            <Route path="authorized/createBlog" element={<CreateAndUpdateBlog />} />
             <Route path="admin/blog" element={<Blog />} />
           </Route>
         </Routes>
