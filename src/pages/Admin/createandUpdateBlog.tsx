@@ -32,14 +32,16 @@ import { useToast } from "@/hooks/use-toast"
 import { AppDispatch, RootState } from '../../redux/store';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { unwrapResult } from '@reduxjs/toolkit';
+import { useState, useEffect } from 'react';
 
 
 const formSchema = z.object({
     title: z.string().min(2, { message: "Title must be at least 2 characters." }).max(50, { message: "Title must be at most 50 characters." }),
     category: z.string().nonempty({ message: "Category is required." }),
-    coverImage: z
-        .instanceof(File, { message: "Cover image is required and must be a valid file." })
-        .or(z.null()),
+    coverImage: z.union([
+        z.string().url("Invalid image URL"), // Existing image URL (when editing)
+        z.instanceof(File, { message: "Please select a valid image file" }) // New file (when uploading)
+    ]).optional(),
     description: z.string().min(10, { message: "Description must be at least 10 characters." }).max(2545000),
 })
 
@@ -65,8 +67,12 @@ export default function CreateandUpdateBlog() {
 }
 
 export const CreateBlogContent = () => {
+    const location = useLocation();
+    const blogToEdit = location.state?.blogToEdit
+
     const creatingBlog = useSelector((state: RootState) => state.createBlog.loading);
     const updatingBlog = useSelector((state: RootState) => state.updateBlog.loading);
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
 
     const loading = creatingBlog || updatingBlog
 
@@ -74,8 +80,6 @@ export const CreateBlogContent = () => {
     const navigate = useNavigate()
     const { toast } = useToast()
 
-    const location = useLocation();
-    const blogToEdit = location.state?.blogToEdit
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -87,9 +91,20 @@ export const CreateBlogContent = () => {
         },
     })
 
+    useEffect(() => {
+        if(blogToEdit?.coverImage){
+          setImagePreview(blogToEdit.coverImage);
+          form.setValue("coverImage", blogToEdit.coverImage);
+        }
+    }, [blogToEdit, form])
+
     const onCreateBlog = async (values: z.infer<typeof formSchema>) => {
         try {
-            const resultAction = await dispatch(createBlogAction(values));
+            let formDataToSend = {
+                ...values,
+                coverImage: values.coverImage instanceof File ? values.coverImage : null,
+            };
+            const resultAction = await dispatch(createBlogAction(formDataToSend));
             unwrapResult(resultAction);
             const successMessage = resultAction.payload?.message || 'User created successfully!';
             toast({
@@ -114,12 +129,16 @@ export const CreateBlogContent = () => {
             });
             return;
         }
+
+        let formDataToSend = {
+            id: { uuid: blogToEdit.uuid },
+            formData: {
+                ...values,
+                coverImage: values.coverImage instanceof File ? values.coverImage : null
+            }
+        };
         try {
-            const resultAction = await dispatch(
-                updateBlogAction({
-                    id: { uuid: blogToEdit.uuid },
-                    formData: values
-                }));
+            const resultAction = await dispatch(updateBlogAction(formDataToSend));
             unwrapResult(resultAction);
             const successMessage = resultAction.payload?.message || 'User created successfully!';
             toast({
@@ -195,16 +214,31 @@ export const CreateBlogContent = () => {
                                 <FormItem>
                                     <FormLabel>Cover Image</FormLabel>
                                     <FormControl>
-                                        <Input
-                                            type="file"
-                                            onChange={(e) => {
-                                                const file = e.target.files?.[0] || null; // Get selected file or null
-                                                field.onChange(file); // Update form value
-                                            }}
-                                            onBlur={field.onBlur} // Maintain blur functionality
-                                            name={field.name} // Ensure the correct name is used
-                                            ref={field.ref} // Use the correct ref for the input
-                                        />
+                                        <div className="space-y-2">
+                                        {imagePreview && (
+                                            <img
+                                                src={imagePreview}
+                                                alt="Cover Preview"
+                                                className="mt-2 w-32 h-32 object-cover rounded"
+                                            />
+                                            )}
+                                            <Input
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={(e) => {
+                                                    const file = e.target.files?.[0] || null;
+                                                    field.onChange(file); // Update form value
+
+                                                    if (file) {
+                                                        const fileURL = URL.createObjectURL(file);
+                                                        setImagePreview(fileURL); // Replace input with new file preview
+                                                    }
+                                                }}
+                                                onBlur={field.onBlur}
+                                                name={field.name}
+                                                ref={field.ref}
+                                            />
+                                        </div>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
