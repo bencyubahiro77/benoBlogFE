@@ -31,3 +31,16 @@
 html {
   font-family: 'Nunito Sans', sans-serif;
 }
+
+.nav{
+  border-top: 2px solid black;
+  border-bottom: 2px solid black;
+}
+
+.footTiltle{
+  border-top: 5px solid black;
+}
+
+.title {
+  font-family: "Jacquarda Bastarda 9", serif;
+}

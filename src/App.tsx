@@ -5,6 +5,7 @@ import User from './pages/Admin/Users'
 import LoginForm from './pages/Admin/Login'
 import CreateAndUpdateBlog from "./pages/Admin/createandUpdateBlog"
 import CreateAndUpdateUser from "./pages/Admin/createandUpdateUser"
+import Homepage from "./pages/public/homepage"
 import { ThemeProvider } from "@/AppComponent/theme-provider"
 import ProtectedRoute from "./utils/protectedRoute"
 import '@fontsource/nunito-sans/400.css';
@@ -19,6 +20,7 @@ const App: React.FC = () => {
       {
         <Routes>
           <Route path="authorized/login" element={<LoginForm />} />
+          <Route path="/" element={<Homepage />} />
 
           {/* Protected routes only by admin */}
           <Route element={<ProtectedRoute allowedRoles={['admin']}/>}>
