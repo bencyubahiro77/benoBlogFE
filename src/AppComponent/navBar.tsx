@@ -10,7 +10,7 @@ const navBar = () => {
 
     return (
         <div>
-            <div className="flex justify-between md:mx-12 m-1 my-4 nav p-3">
+            <div className="flex justify-between nav p-3">
                 <div className="flex gap-1">
                     <Globe />
                     <h1>{date}</h1>
@@ -21,7 +21,7 @@ const navBar = () => {
                 </div>
             </div>
             <h1 className="text-5xl text-center font-bold title">BENO</h1>
-            <div className="flex justify-center md:gap-8 gap-4 text-lg nav p-3 md:mx-12 my-4 font-semibold ">
+            <div className="flex justify-center md:gap-8 gap-4 text-lg nav p-3 font-semibold ">
                 <h1 className="cursor-pointer md:flex hidden hover:underline">World News</h1>
                 <h1 className="cursor-pointer hover:underline">Politics</h1>
                 <h1 className="cursor-pointer hover:underline">Technology</h1>
