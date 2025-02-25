@@ -193,7 +193,7 @@ export const CreateBlogContent = () => {
                                             </SelectTrigger>
                                             <SelectContent>
                                                 <SelectItem value="business">Business</SelectItem>
-                                                <SelectItem value="politic">Politic</SelectItem>
+                                                <SelectItem value="politics">Politics</SelectItem>
                                                 <SelectItem value="technology">Technology</SelectItem>
                                                 <SelectItem value="health">Health</SelectItem>
                                                 <SelectItem value="sports">Sports</SelectItem>

@@ -16,12 +16,13 @@ const homepage = () => {
 
     const dispatch = useDispatch<AppDispatch>();
     const { blogsByPage, status } = useSelector((state: RootState) => state.blogs);
-
-    const latestBlog = blogsByPage[1]?.[0];
-
+     
     useEffect(() => {
         dispatch(fetchBlogsAction(1));
     }, [dispatch]);
+
+    const sortedBlog = Object.values(blogsByPage).flat().sort((a:any, b:any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    const latestBlog = sortedBlog[0];
 
     return (
         <div className="md:mx-12 m-1 my-4">
